@@ -24,7 +24,7 @@ int main(int argc, char** argv) {
 
   const int num_dev = omp_get_num_devices();
 
-  int* buf = (int *) omp_target_alloc_device(N*sizeof(int), world_rank % num_dev);
+  int* buf = (int *) omp_target_alloc(N*sizeof(int), world_rank % num_dev);
   if (world_rank == 0) {
     #pragma omp target is_device_ptr(buf) device(world_rank % num_dev)
     for (int i=0; i<N; ++i)

@@ -22,7 +22,7 @@ int main(int argc, char** argv) {
 
   const int num_dev = omp_get_num_devices();
 
-  int* dev = (int *) omp_target_alloc_device(N*sizeof(int), world_rank % num_dev);
+  int* dev = (int *) omp_target_alloc(N*sizeof(int), world_rank % num_dev);
   int * buf = (int*) malloc(N*sizeof(int));
 
   if (world_rank == 0) {
