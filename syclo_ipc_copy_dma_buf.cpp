@@ -95,10 +95,8 @@ void run_client(int commSocket, uint32_t clientId) {
 
     ze_ipc_mem_handle_t pIpcHandle;
     memcpy(&pIpcHandle, static_cast<void *>(&dma_buf_fd), sizeof(dma_buf_fd));
-      
-    sycl::gpu_selector selector;
-    sycl::queue Q(selector);
-
+    sycl::queue Q(sycl::gpu_selector{});
+    
     sycl::device dev = Q.get_device();
     sycl::context ctx = Q.get_context();
     void *zeIpcBuffer;
