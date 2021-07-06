@@ -1,10 +1,3 @@
-/*
- * Copyright (C) 2020-2021 Intel Corporation
- *
- * SPDX-License-Identifier: MIT
- *
- */
-
 #include "zello_common.h"
 
 #include <sys/socket.h>
