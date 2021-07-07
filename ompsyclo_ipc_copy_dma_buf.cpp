@@ -116,7 +116,7 @@ void run_client(int commSocket, uint32_t clientId) {
    #pragma omp interop destroy(o) 
 
    SUCCESS_OR_TERMINATE(zeMemCloseIpcHandle(ze_context, zeIpcBuffer));
-   std::cout << "end client" << std::endl;
+   std::cout << "Client " << clientId << ", process ID: " << std::dec << getpid() << " closed ipc Handle" << "\n";
    delete[] heapBuffer;
 }
 
@@ -136,7 +136,6 @@ void run_server(bool &validRet) {
         SUCCESS_OR_TERMINATE(zeMemGetIpcHandle(ctx.get_native<sycl::backend::level_zero>(), 
                                                zeBuffer, &pIpcHandle));
 
-        std::cout << "1" << std::endl;
         // Pass the dma_buf to the other process
         int dma_buf_fd;
         memcpy(static_cast<void *>(&dma_buf_fd), &pIpcHandle, sizeof(dma_buf_fd));
@@ -145,24 +144,21 @@ void run_server(bool &validRet) {
             std::cerr << "Failing to send dma_buf fd to client\n";
             std::terminate();
         }
-        std::cout << "2" << std::endl;
 
         char *heapBuffer = new char[allocSize];
         for (size_t i = 0; i < allocSize; ++i) {
             heapBuffer[i] = static_cast<char>(i + 1);
         }
-        std::cout << "3" << std::endl;
         // Wait for child to exit
         int child_status;
+        std::cout << "Server waiting for client " << i << " to finish" << std::endl; 
         pid_t clientPId = wait(&child_status);
         if (clientPId <= 0) {
             std::cerr << "Client terminated abruptly with error code " << strerror(errno) << "\n";
             std::terminate();
         }
-        std::cout << "4" << std::endl;
         void *validateBuffer = sycl::malloc_shared(allocSize, Q);     
         
-        value = 5;
         Q.fill(validateBuffer, reinterpret_cast<void *>(&value), allocSize).wait();
 
         // Copy from device-allocated memory
@@ -194,6 +190,7 @@ int main(int argc, char *argv[]) {
             close(sv[i][0]);
             run_client(sv[i][1], i);
             close(sv[i][1]);
+            std::cout << "Client " << i << ", process ID: " << std::dec << getpid() << " closed socket" << "\n";            
             exit(0);
         }
     }
